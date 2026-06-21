@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 3: Algorithms & Logic</title>
+    <style>
+        /* ─── GLOBAL STYLES & CYBER ORANGE THEME ─── */
+        :root {
+            --bg-canvas: #0c0703;
+            --bg-module: #1a0f07;
+            --accent-orange: #f97316;
+            --accent-glow: #ff6b00;
+            --text-primary: #fdf8f5;
+            --text-muted: #bc987e;
+            --panel-border: #3a2213;
+            --success-green: #116b32;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+        }
+
+        /* ─── PROGRESS BAR ─── */
+        .progress-container {
+            width: 100%;
+            max-width: 900px;
+            background-color: var(--bg-module);
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 25px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 12.5%;
+            background-color: var(--accent-orange);
+            box-shadow: 0 0 12px var(--accent-glow);
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ─── MAIN CAROUSEL ─── */
+        .carousel-container {
+            width: 100%;
+            max-width: 900px;
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .slide {
+            width: 100%;
+            display: none;
+            animation: slideFade 0.4s ease forwards;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        @keyframes slideFade {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .chapter-tag {
+            color: var(--accent-orange);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .slide-title {
+            font-size: 2.2rem;
+            color: var(--text-primary);
+            border-right: 5px solid var(--accent-orange);
+            padding-right: 15px;
+            line-height: 1.2;
+        }
+
+        /* ─── MINIMALIST CONTENT BLOCK (KEYWORD + VISUAL) ─── */
+        .content-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .keywords-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .keyword-item {
+            background-color: var(--bg-module);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 18px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .keyword-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .english-token {
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--accent-orange);
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: rgba(249, 115, 22, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* ─── VISUAL FRAMES (1:1 ASPECT RATIO STRICT) ─── */
+        .visual-frame {
+            background-color: var(--bg-module);
+            border: 2px dashed var(--panel-border);
+            border-radius: 12px;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        .visual-frame.glow {
+            border-color: var(--accent-orange);
+            box-shadow: inset 0 0 20px rgba(249, 115, 22, 0.05);
+        }
+
+        /* ─── GRID FOR SHIPS STATE (SLIDE 3) ─── */
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .grid-node {
+            background: rgba(12, 7, 3, 0.6);
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        /* ─── FLOWCHART DIAGRAM GENERATOR ─── */
+        .flow-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .flow-shape {
+            padding: 10px 20px;
+            border: 2px solid var(--accent-orange);
+            font-weight: bold;
+            font-size: 0.95rem;
+            text-align: center;
+            background: var(--bg-canvas);
+        }
+
+        .flow-capsule { border-radius: 20px; width: 70%; }
+        .flow-parallelogram { transform: skew(-15deg); width: 80%; }
+        .flow-parallelogram span { transform: skew(15deg); display: block; }
+        .flow-rect { width: 85%; }
+        
+        .flow-arrow {
+            width: 2px;
+            height: 15px;
+            background-color: var(--panel-border);
+            position: relative;
+        }
+        .flow-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: -4px;
+            border-width: 5px 5px 0 5px;
+            border-style: solid;
+            border-color: var(--panel-border) transparent transparent transparent;
+        }
+
+        /* ─── CODE ENGINE FRAME ─── */
+        .code-box {
+            background-color: #050301;
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            direction: ltr;
+            text-align: left;
+            width: 100%;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .c-kw { color: #ff7b72; font-weight: bold; }
+        .c-fn { color: #d2a8ff; }
+        .c-str { color: #a5d6ff; }
+
+        /* ─── QUIZ SYSTEM INTERFACE ─── */
+        .quiz-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .quiz-option {
+            background-color: var(--bg-module);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            text-align: right;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-orange);
+            background-color: rgba(249, 115, 22, 0.02);
+        }
+
+        .quiz-option.correct {
+            border-color: var(--success-green);
+            background-color: rgba(17, 107, 50, 0.1);
+            color: #85e89d;
+        }
+
+        .quiz-option.wrong {
+            border-color: #6b1111;
+            background-color: rgba(107, 17, 17, 0.1);
+            color: #ff7b72;
+        }
+
+        .feedback-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 10px;
+            min-height: 24px;
+        }
+
+        /* ─── NAVIGATION BUTTONS ─── */
+        .nav-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+        }
+
+        .btn-nav {
+            background-color: var(--bg-module);
+            border: 1px solid var(--panel-border);
+            color: var(--text-primary);
+            padding: 12px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-nav:hover:not(:disabled) {
+            border-color: var(--accent-orange);
+            color: var(--accent-orange);
+        }
+
+        .btn-nav:disabled {
+            opacity: 0.25;
+            cursor: not-allowed;
+        }
+
+        .dots-container {
+            display: flex;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--panel-border);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .dot.active {
+            background-color: var(--accent-orange);
+            box-shadow: 0 0 8px var(--accent-glow);
+            width: 18px;
+            border-radius: 4px;
+        }
+
+        /* ─── ICONS (PURE INLINE SVGs) ─── */
+        .neon-icon {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent-orange);
+            stroke-width: 2;
+            fill: none;
+            filter: drop-shadow(0 0 4px var(--accent-glow));
+        }
+        .neon-icon-lg {
+            width: 64px;
+            height: 64px;
+            stroke: var(--accent-orange);
+            stroke-width: 1.5;
+            fill: none;
+            filter: drop-shadow(0 0 8px var(--accent-glow));
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PROGRESS LINE -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- MAIN CAROUSEL -->
+    <div class="carousel-container">
+
+        <!-- SLIDE 1: THE COGNITIVE BRIDGE -->
+        <div class="slide active">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                CH.03 · ORANGE
+            </div>
+            <h2 class="slide-title">جسر العبور: من الإشارة إلى الترتيب</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                        <span class="keyword-text">الكمبيوتر كهرباء وفقط <span class="english-token">Machine Code</span></span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <span class="keyword-text">الفجوة بين لغتنا ولغته</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
+                        <span class="keyword-text">الحل: تنظيم الأفكار أولاً!</span>
+                    </div>
+                </div>
+                <div class="visual-frame glow">
+                    <svg class="neon-icon-lg" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="22" y2="7"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: THE HOOK -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
+                BRAIN TEASER · حيّر دماغك
+            </div>
+            <h2 class="slide-title">لغز الكلمات المجملة</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        <span class="keyword-text">طلب عام: "اعمل كوباية عصير"</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                        <span class="keyword-text">الكمبيوتر جماد لا يملك استنتاجاً</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span class="keyword-text">الهدف: تفاصيل ميكروسكوبية مرتبة</span>
+                    </div>
+                </div>
+                <div class="visual-frame">
+                    <svg class="neon-icon-lg" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: WHAT IS AN ALGORITHM? -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5v-15z"/></svg>
+                TOPIC 3.1 · WHAT IS AN ALGORITHM?
+            </div>
+            <h2 class="slide-title">ما هي الخوارزمية؟ — وصفة الحل</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span class="keyword-text">مفهوم الخوارزمية <span class="english-token">Algorithm</span></span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span class="keyword-text">التفكير المنطقي والعقلي قبل التنفيذ</span>
+                    </div>
+                </div>
+                <div class="visual-frame glow">
+                    <div class="grid-4">
+                        <div class="grid-node" style="color: var(--accent-orange);">CLEAR</div>
+                        <div class="grid-node">FINITE</div>
+                        <div class="grid-node">CORRECT</div>
+                        <div class="grid-node">GENERAL</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 4: THE INTEGRATED PIPELINE (PROBLEM) -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                PIPELINE 01 · THE PROBLEM
+            </div>
+            <h2 class="slide-title">المرحلة الأولى: تحديد المشكلة</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                        <span class="keyword-text">المشكلة المستهدفة: "جمع رقمين"</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><arrow-right></arrow-right><polyline points="12 5 19 12 12 19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span class="keyword-text">تحديد المدخلات <span class="english-token">Inputs</span>: الرقم أ، الرقم ب</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg>
+                        <span class="keyword-text">تحديد المخرجات <span class="english-token">Output</span>: المجموع</span>
+                    </div>
+                </div>
+                <div class="visual-frame" style="border-color: #6b1111;">
+                    <span style="font-size: 5rem; font-weight: bold; color: #ff7b72;">?</span>
+                    <span style="color: var(--text-muted); font-weight: bold;">أين الحل؟</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 5: PIPELINE (PSEUDO-CODE) -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><div aria-hidden="true"></div><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+                PIPELINE 02 · PSEUDO-CODE
+            </div>
+            <h2 class="slide-title">المرحلة الثانية: الـ Pseudo-code</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span class="keyword-text">كتابة كود وصفي غير مقيد بلغة</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><list></list><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+                        <span class="keyword-text">ترتيب منطقي خطوة بخطوة للبشر</span>
+                    </div>
+                </div>
+                <div class="visual-frame glow">
+                    <div class="code-box">
+                        <div><span class="c-kw">ALGORITHM</span> AddTwoNumbers</div>
+                        <div><span class="c-kw">BEGIN</span></div>
+                        <div>&nbsp;&nbsp;READ number1</div>
+                        <div>&nbsp;&nbsp;READ number2</div>
+                        <div>&nbsp;&nbsp;sum = number1 + number2</div>
+                        <div>&nbsp;&nbsp;PRINT sum</div>
+                        <div><span class="c-kw">END</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: PIPELINE (FLOWCHART) -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                PIPELINE 03 · FLOWCHART
+            </div>
+            <h2 class="slide-title">المرحلة الثالثة: الـ Flowchart</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg>
+                        <span class="keyword-text">الرسم والتمثيل البصري للـ Flow</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        <span class="keyword-text">أشكال هندسية اصطلاحية محددة</span>
+                    </div>
+                </div>
+                <div class="visual-frame glow">
+                    <div class="flow-diagram">
+                        <div class="flow-shape flow-capsule">البداية (Start)</div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-shape flow-parallelogram"><span>اقرأ الرقمين أ ، ب</span></div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-shape flow-rect">المجموع = أ + ب</div>
+                        <div class="flow-arrow"></div>
+                        <div class="flow-shape flow-capsule">النهاية (End)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: PIPELINE (CODE) -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                PIPELINE 04 · ACTUAL CODE
+            </div>
+            <h2 class="slide-title">المرحلة الرابعة: الكود البرمجي</h2>
+            <div class="content-layout">
+                <div class="keywords-list">
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/></svg>
+                        <span class="keyword-text">الترجمة النهائية للآلة</span>
+                    </div>
+                    <div class="keyword-item">
+                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <span class="keyword-text">استخدام لغة برمجة حقيقية</span>
+                    </div>
+                </div>
+                <div class="visual-frame glow">
+                    <div class="code-box">
+                        <div><span class="c-kw">let</span> a = <span class="c-str">5</span>;</div>
+                        <div><span class="c-kw">let</span> b = <span class="c-str">10</span>;</div>
+                        <div><span class="c-kw">let</span> sum = a + b;</div>
+                        <div><span class="c-fn">console</span>.<span class="c-fn">log</span>(sum);</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: COMPREHENSIVE QUIZ -->
+        <div class="slide">
+            <div class="chapter-tag">
+                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                ASSESSMENT · اختبر معلوماتك
+            </div>
+            <h2 class="slide-title" id="quizTitle">سؤال الحصة!</h2>
+            <div class="quiz-container">
+                <p class="description" id="quizQuestion" style="font-weight: bold; margin-bottom: 10px;"></p>
+                <div class="quiz-option" id="opt0" onclick="checkAnswer(0)"></div>
+                <div class="quiz-option" id="opt1" onclick="checkAnswer(1)"></div>
+                <div class="quiz-option" id="opt2" onclick="checkAnswer(2)"></div>
+                <div class="feedback-text" id="quizFeedback"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CAROUSEL NAVIGATION CONTROLS -->
+    <div class="nav-container">
+        <button class="btn-nav" id="btnPrev" onclick="changeSlide(-1)" disabled>السابق</button>
+        <div class="dots-container" id="dotsContainer"></div>
+        <button class="btn-nav" id="btnNext" onclick="changeSlide(1)">التالي</button>
+    </div>
+
+    <script>
+        // ─── SLIDE CAROUSEL SYSTEM ───
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dotsContainer = document.getElementById('dotsContainer');
+        const progressBar = document.getElementById('progressBar');
+        const btnPrev = document.getElementById('btnPrev');
+        const btnNext = document.getElementById('btnNext');
+
+        // Dynamically build navigation indicators
+        slides.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.onclick = () => goToSlide(i);
+            dotsContainer.appendChild(dot);
+        });
+        const dots = document.querySelectorAll('.dot');
+
+        function updateUI() {
+            slides.forEach((slide, index) => slide.classList.toggle('active', index === currentSlide));
+            dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
+            
+            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+            btnPrev.disabled = currentSlide === 0;
+            btnNext.disabled = currentSlide === slides.length - 1;
+
+            if (currentSlide === slides.length - 1) {
+                loadQuizQuestion();
+            }
+        }
+
+        function changeSlide(dir) {
+            currentSlide += dir;
+            updateUI();
+        }
+
+        function goToSlide(idx) {
+            currentSlide = idx;
+            updateUI();
+        }
+
+        // ─── INTERACTIVE IN-CLASS QUIZ SYSTEM ───
+        const quizData = [
+            {
+                q: "الكمبيوتر مبيفهمش لغتنا العادية لأنه في الأصل عبارة عن إيه؟",
+                options: ["جهاز شغال بإشارات ومسارات كهربائية 0 و 1", "شاشة ذكية بتخمن كلامنا لوحدها", "برنامج ألعاب كبير"],
+                correct: 0,
+                feedback: "ممتاز! الكمبيوتر هاردوير بيفهم نبضات الكهرباء بس."
+            },
+            {
+                q: "مين اللي بنعمله الأول وبنرتب فيه دماغنا قبل ما نلمس الكيبورد ونبرمج؟",
+                options: ["بنكتب الكود البرمجي الفعلي حلاً سريعاً", "بنصمم الخوارزمية Algorithm ونرتب خطوات الحل", "بنقفل الجهاز ونفتحه تاني"],
+                correct: 1,
+                feedback: "صحيح! التفكير المنطقي وتصميم الـ Algorithm هو الخطوة الأساسية الأولى."
+            },
+            {
+                q: "لما بنرسم أشكال هندسية (زي المستطيل والمتوازي) عشان نوضح خطوات الحل، ده بيبقى اسمه:",
+                options: ["سودوكو Pseudo-code", "كود برمجي Code", "مخطط تدفق Flowchart"],
+                correct: 2,
+                feedback: "رائع! الأشكال الهندسية والأسهم بتعبر عن الـ Flowchart."
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let answered = false;
+
+        function loadQuizQuestion() {
+            answered = false;
+            const currentQ = quizData[currentQuizIndex];
+            document.getElementById('quizTitle').innerText = `سؤال الحصة (${currentQuizIndex + 1} من ${quizData.length})`;
+            document.getElementById('quizQuestion').innerText = currentQ.q;
+            document.getElementById('quizFeedback').innerText = "";
+            document.getElementById('quizFeedback').style.color = "var(--text-primary)";
+
+            currentQ.options.forEach((opt, idx) => {
+                const el = document.getElementById(`opt${idx}`);
+                el.innerText = opt;
+                el.className = "quiz-option";
+            });
+        }
+
+        function checkAnswer(selectedIdx) {
+            if (answered) return;
+            answered = true;
+
+            const currentQ = quizData[currentQuizIndex];
+            const feedbackEl = document.getElementById('quizFeedback');
+
+            if (selectedIdx === currentQ.correct) {
+                document.getElementById(`opt${selectedIdx}`).classList.add('correct');
+                feedbackEl.innerText = currentQ.feedback;
+                feedbackEl.style.color = "#85e89d";
+                
+                // Cycle to the next question automatically after a short delay
+                setTimeout(() => {
+                    currentQuizIndex = (currentQuizIndex + 1) % quizData.length;
+                    loadQuizQuestion();
+                }, 2500);
+            } else {
+                document.getElementById(`opt${selectedIdx}`).classList.add('wrong');
+                document.getElementById(`opt${currentQ.correct}`).classList.add('correct');
+                feedbackEl.innerText = "حاول تاني! ركز في الترتيب والمفهوم المنطقي.";
+                feedbackEl.style.color = "#ff7b72";
+                
+                setTimeout(() => {
+                    loadQuizQuestion();
+                }, 2500);
+            }
+        }
+    </script>
+</body>
+</html>
