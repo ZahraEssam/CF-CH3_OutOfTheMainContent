@@ -1,715 +1,700 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chapter 3: Algorithms & Logic</title>
-    <style>
-        /* ─── GLOBAL STYLES & CYBER ORANGE THEME ─── */
-        :root {
-            --bg-canvas: #0c0703;
-            --bg-module: #1a0f07;
-            --accent-orange: #f97316;
-            --accent-glow: #ff6b00;
-            --text-primary: #fdf8f5;
-            --text-muted: #bc987e;
-            --panel-border: #3a2213;
-            --success-green: #116b32;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pseudocode x Sudoku</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f6fa;
+  --surf: #ffffff;
+  --pri: #2d3a8c;
+  --pri-l: #eaecf8;
+  --acc: #1a6e4a;
+  --acc-l: #e4f2eb;
+  --ylw: #fffbea;
+  --ylw-b: #f0c030;
+  --txt: #1a1a1a;
+  --mut: #5a5a6a;
+  --bdr: rgba(0,0,0,0.09);
+  --r: 12px;
+}
+body {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--txt);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  direction: rtl;
+}
+.deck {
+  width: 100%; max-width: 840px;
+  background: var(--surf);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.09);
+  border: 1px solid var(--bdr);
+  overflow: hidden;
+  display: flex; flex-direction: column;
+  min-height: 560px;
+}
+.topbar {
+  background: var(--pri);
+  padding: 0.85rem 1.6rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.topbar .t1 { font-size: 1.05rem; font-weight: 700; color: #fff; }
+.topbar .t2 { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+.pw { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.pl { font-size: 0.72rem; color: rgba(255,255,255,0.6); white-space: nowrap; }
+.pb { width: 110px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden; }
+.pf { height: 100%; background: #fff; border-radius: 4px; transition: width 0.4s; }
+.body {
+  flex: 1;
+  padding: 1.75rem 2rem;
+  display: flex; flex-direction: column;
+  gap: 1.1rem;
+  overflow-y: auto;
+}
+.slide { display: none; flex-direction: column; gap: 1.1rem; animation: fi 0.3s ease; }
+.slide.active { display: flex; }
+@keyframes fi { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+.tag {
+  display: inline-block;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+  color: var(--pri); background: var(--pri-l);
+  padding: 3px 10px; border-radius: 30px; width: fit-content;
+}
+h1.sh { font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
+h2.sh { font-size: 1.2rem; font-weight: 700; line-height: 1.3; }
+p.bt { font-size: 0.97rem; line-height: 1.8; }
+.blue-box {
+  background: var(--pri-l); border-right: 4px solid var(--pri);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 0.85rem 1.05rem; font-size: 0.93rem; line-height: 1.75;
+}
+.green-box {
+  background: var(--acc-l); border-right: 4px solid var(--acc);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: 0.85rem 1.05rem; font-size: 0.93rem; line-height: 1.75;
+}
+.ylw-box {
+  background: var(--ylw); border: 1px solid var(--ylw-b);
+  border-radius: var(--r);
+  padding: 0.75rem 1rem; font-size: 0.88rem; font-weight: 600;
+  color: #7a5200; width: fit-content;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.75rem;
+}
+.card {
+  background: var(--surf); border: 1px solid var(--bdr);
+  border-radius: var(--r); padding: 0.9rem 1rem;
+}
+.card .cl { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mut); margin-bottom: 0.3rem; }
+.card .cv { font-size: 1rem; font-weight: 600; line-height: 1.4; }
+.card .cs { font-size: 0.8rem; color: var(--mut); margin-top: 4px; line-height: 1.5; }
+.steps { display: flex; flex-direction: column; gap: 0.55rem; list-style: none; }
+.steps li { display: flex; align-items: flex-start; gap: 0.7rem; font-size: 0.94rem; line-height: 1.7; }
+.sn {
+  flex-shrink: 0; width: 26px; height: 26px;
+  background: var(--pri); color: #fff;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 700; margin-top: 2px;
+}
+.divider { height: 1px; background: var(--bdr); margin: 0.15rem 0; }
+/* Quiz */
+.qq { font-size: 0.97rem; font-weight: 600; margin-bottom: 0.55rem; }
+.qo { display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.65rem; }
+.qb {
+  padding: 0.55rem 1rem; border-radius: 8px;
+  border: 1.5px solid var(--bdr); background: var(--surf);
+  cursor: pointer; font-size: 0.9rem; text-align: right;
+  transition: all 0.18s; font-family: inherit; color: var(--txt);
+}
+.qb:hover:not(:disabled) { border-color: var(--pri); background: var(--pri-l); }
+.qb.correct { border-color: var(--acc); background: var(--acc-l); color: #0f4d32; font-weight: 600; }
+.qb.wrong { border-color: #c0392b; background: #fdecea; color: #7b1e1e; }
+.qfb { font-size: 0.86rem; font-weight: 600; min-height: 1.4rem; }
+.qfb.ok { color: var(--acc); }
+.qfb.no { color: #c0392b; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+/* === Pseudocode Step-by-Step (Slide 7) === */
+.ps-container {
+  display: flex; flex-direction: column; gap: 0;
+  border: 1px solid var(--bdr); border-radius: var(--r); overflow: hidden;
+}
+.ps-row {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid var(--bdr);
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.ps-row:last-child { border-bottom: none; }
+.ps-row.visible { opacity: 1; transform: translateY(0); }
+.ps-num {
+  flex-shrink: 0; width: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--pri); color: #fff;
+  font-size: 0.78rem; font-weight: 700;
+}
+.ps-code {
+  flex: 1;
+  background: #1c1e2e; color: #cdd6f4;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem; line-height: 1;
+  padding: 0.75rem 1rem;
+  direction: ltr; text-align: left;
+  display: flex; align-items: center;
+  min-height: 44px;
+}
+.ps-label {
+  flex-shrink: 0; width: 200px;
+  background: var(--surf);
+  font-size: 0.82rem; color: var(--txt);
+  padding: 0.7rem 0.9rem;
+  display: flex; align-items: center;
+  line-height: 1.45; border-right: 1px solid var(--bdr);
+}
+.ps-next-hint {
+  text-align: center;
+  font-size: 0.8rem; color: var(--mut);
+  padding-top: 0.5rem;
+  min-height: 1.4rem;
+}
+.kw { color: #89b4fa; }
+.fn { color: #a6e3a1; }
+.cm { color: #6c7086; font-style: italic; }
+.vl { color: #fab387; }
 
-        body {
-            background-color: var(--bg-canvas);
-            color: var(--text-primary);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            padding: 25px;
-        }
+/* Sudoku */
+.sw { display: flex; flex-direction: column; align-items: center; gap: 0.85rem; }
+.sg {
+  display: grid; grid-template-columns: repeat(9, 1fr);
+  border: 3px solid var(--pri); border-radius: 6px;
+  overflow: hidden; width: fit-content;
+}
+.sc {
+  width: 44px; height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; font-weight: 600;
+  border: 1px solid #ccc;
+  background: #fff; color: var(--txt);
+}
+.sc.given { background: var(--pri-l); color: var(--pri); }
+.sc input {
+  width: 100%; height: 100%;
+  border: none; outline: none; text-align: center;
+  font-size: 1rem; font-weight: 600;
+  background: transparent; color: #1a6e4a;
+  font-family: inherit; cursor: pointer;
+}
+.sc.err input { color: #c0392b; background: #fdecea; }
+.sc.okc { background: #e4f2eb; }
+.brT { border-right: 3px solid var(--pri) !important; }
+.bbT { border-bottom: 3px solid var(--pri) !important; }
+.ss { font-size: 0.9rem; font-weight: 600; min-height: 1.4rem; text-align: center; }
+.ss.ok { color: var(--acc); }
+.ss.err { color: #c0392b; }
+.sbtns { display: flex; gap: 0.65rem; flex-wrap: wrap; justify-content: center; }
 
-        /* ─── PROGRESS BAR ─── */
-        .progress-container {
-            width: 100%;
-            max-width: 900px;
-            background-color: var(--bg-module);
-            height: 6px;
-            border-radius: 3px;
-            margin-bottom: 25px;
-            border: 1px solid var(--panel-border);
-        }
+/* Bottom bar */
+.btm {
+  padding: 0.9rem 1.6rem;
+  display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--bdr); gap: 1rem;
+}
+.btn {
+  padding: 0.55rem 1.3rem; border-radius: 8px;
+  font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; transition: all 0.18s;
+  border: none; font-family: inherit;
+}
+.btn-p { background: var(--pri); color: #fff; }
+.btn-p:hover { background: #222e70; }
+.btn-g { background: transparent; color: var(--mut); border: 1px solid var(--bdr); }
+.btn-g:hover { background: var(--bg); color: var(--txt); }
+.nhint { font-size: 0.76rem; color: var(--mut); text-align: center; flex: 1; }
 
-        .progress-bar {
-            height: 100%;
-            width: 12.5%;
-            background-color: var(--accent-orange);
-            box-shadow: 0 0 12px var(--accent-glow);
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+/* Quiz slide 8 */
+.qscore {
+  text-align: center; padding: 1rem;
+  font-size: 1.1rem; font-weight: 700;
+  color: var(--pri); display: none;
+}
+.qprogress {
+  font-size: 0.78rem; color: var(--mut);
+  margin-bottom: 0.5rem;
+}
 
-        /* ─── MAIN CAROUSEL ─── */
-        .carousel-container {
-            width: 100%;
-            max-width: 900px;
-            flex-grow: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .slide {
-            width: 100%;
-            display: none;
-            animation: slideFade 0.4s ease forwards;
-        }
-
-        .slide.active {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        @keyframes slideFade {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .chapter-tag {
-            color: var(--accent-orange);
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .slide-title {
-            font-size: 2.2rem;
-            color: var(--text-primary);
-            border-right: 5px solid var(--accent-orange);
-            padding-right: 15px;
-            line-height: 1.2;
-        }
-
-        /* ─── MINIMALIST CONTENT BLOCK (KEYWORD + VISUAL) ─── */
-        .content-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .keywords-list {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .keyword-item {
-            background-color: var(--bg-module);
-            border: 1px solid var(--panel-border);
-            border-radius: 8px;
-            padding: 18px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .keyword-text {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .english-token {
-            font-family: 'Courier New', Courier, monospace;
-            color: var(--accent-orange);
-            font-size: 1.1rem;
-            font-weight: 700;
-            background: rgba(249, 115, 22, 0.08);
-            padding: 2px 6px;
-            border-radius: 4px;
-            direction: ltr;
-            display: inline-block;
-        }
-
-        /* ─── VISUAL FRAMES (1:1 ASPECT RATIO STRICT) ─── */
-        .visual-frame {
-            background-color: var(--bg-module);
-            border: 2px dashed var(--panel-border);
-            border-radius: 12px;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            padding: 20px;
-        }
-
-        .visual-frame.glow {
-            border-color: var(--accent-orange);
-            box-shadow: inset 0 0 20px rgba(249, 115, 22, 0.05);
-        }
-
-        /* ─── GRID FOR SHIPS STATE (SLIDE 3) ─── */
-        .grid-4 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            width: 100%;
-            height: 100%;
-        }
-
-        .grid-node {
-            background: rgba(12, 7, 3, 0.6);
-            border: 1px solid var(--panel-border);
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        /* ─── FLOWCHART DIAGRAM GENERATOR ─── */
-        .flow-diagram {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-        }
-
-        .flow-shape {
-            padding: 10px 20px;
-            border: 2px solid var(--accent-orange);
-            font-weight: bold;
-            font-size: 0.95rem;
-            text-align: center;
-            background: var(--bg-canvas);
-        }
-
-        .flow-capsule { border-radius: 20px; width: 70%; }
-        .flow-parallelogram { transform: skew(-15deg); width: 80%; }
-        .flow-parallelogram span { transform: skew(15deg); display: block; }
-        .flow-rect { width: 85%; }
-        
-        .flow-arrow {
-            width: 2px;
-            height: 15px;
-            background-color: var(--panel-border);
-            position: relative;
-        }
-        .flow-arrow::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: -4px;
-            border-width: 5px 5px 0 5px;
-            border-style: solid;
-            border-color: var(--panel-border) transparent transparent transparent;
-        }
-
-        /* ─── CODE ENGINE FRAME ─── */
-        .code-box {
-            background-color: #050301;
-            border: 1px solid var(--panel-border);
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            direction: ltr;
-            text-align: left;
-            width: 100%;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .c-kw { color: #ff7b72; font-weight: bold; }
-        .c-fn { color: #d2a8ff; }
-        .c-str { color: #a5d6ff; }
-
-        /* ─── QUIZ SYSTEM INTERFACE ─── */
-        .quiz-container {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-        }
-
-        .quiz-option {
-            background-color: var(--bg-module);
-            border: 1px solid var(--panel-border);
-            border-radius: 8px;
-            padding: 15px 20px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            text-align: right;
-        }
-
-        .quiz-option:hover {
-            border-color: var(--accent-orange);
-            background-color: rgba(249, 115, 22, 0.02);
-        }
-
-        .quiz-option.correct {
-            border-color: var(--success-green);
-            background-color: rgba(17, 107, 50, 0.1);
-            color: #85e89d;
-        }
-
-        .quiz-option.wrong {
-            border-color: #6b1111;
-            background-color: rgba(107, 17, 17, 0.1);
-            color: #ff7b72;
-        }
-
-        .feedback-text {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-top: 10px;
-            min-height: 24px;
-        }
-
-        /* ─── NAVIGATION BUTTONS ─── */
-        .nav-container {
-            width: 100%;
-            max-width: 900px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 25px;
-        }
-
-        .btn-nav {
-            background-color: var(--bg-module);
-            border: 1px solid var(--panel-border);
-            color: var(--text-primary);
-            padding: 12px 28px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-nav:hover:not(:disabled) {
-            border-color: var(--accent-orange);
-            color: var(--accent-orange);
-        }
-
-        .btn-nav:disabled {
-            opacity: 0.25;
-            cursor: not-allowed;
-        }
-
-        .dots-container {
-            display: flex;
-            gap: 6px;
-        }
-
-        .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background-color: var(--panel-border);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .dot.active {
-            background-color: var(--accent-orange);
-            box-shadow: 0 0 8px var(--accent-glow);
-            width: 18px;
-            border-radius: 4px;
-        }
-
-        /* ─── ICONS (PURE INLINE SVGs) ─── */
-        .neon-icon {
-            width: 24px;
-            height: 24px;
-            stroke: var(--accent-orange);
-            stroke-width: 2;
-            fill: none;
-            filter: drop-shadow(0 0 4px var(--accent-glow));
-        }
-        .neon-icon-lg {
-            width: 64px;
-            height: 64px;
-            stroke: var(--accent-orange);
-            stroke-width: 1.5;
-            fill: none;
-            filter: drop-shadow(0 0 8px var(--accent-glow));
-        }
-    </style>
+/* Conclusion */
+.con-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1.25rem; text-align: center; padding: 1.5rem 0;
+}
+.con-badge {
+  width: 64px; height: 64px;
+  background: var(--pri-l); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; font-weight: 700; color: var(--pri);
+}
+.con-sentence {
+  font-size: 1.15rem; font-weight: 700;
+  color: var(--txt); max-width: 520px;
+  line-height: 1.6;
+  border: 2px solid var(--pri); border-radius: var(--r);
+  padding: 1rem 1.5rem; background: var(--pri-l);
+}
+.idea-tags {
+  display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+}
+.idea-tag {
+  background: var(--surf); border: 1px solid var(--bdr);
+  border-radius: 30px; padding: 4px 14px;
+  font-size: 0.82rem; font-weight: 600; color: var(--mut);
+}
+</style>
 </head>
 <body>
+<div class="deck">
 
-    <!-- PROGRESS LINE -->
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+  <div class="topbar">
+    <div>
+      <div class="t1">Pseudocode x Sudoku</div>
+      <div class="t2">بنتعلم Pseudocode باستخدام لعبة Sudoku</div>
+    </div>
+    <div class="pw">
+      <span class="pl" id="counter">1 / 9</span>
+      <div class="pb"><div class="pf" id="progress" style="width:11.1%"></div></div>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- SLIDE 1: Intro -->
+    <div class="slide active" id="slide-1">
+      <span class="tag">مقدمة</span>
+      <h1 class="sh">عندنا 3 طرق نكتب بيها Algorithm</h1>
+      <p class="bt">الـ Algorithm هو مجموعة خطوات لحل مشكلة — زي وصفة الطبخ بالظبط. وعندنا 3 طرق نكتبه:</p>
+      <div class="cards">
+        <div class="card">
+          <div class="cl">الطريقة الاولى</div>
+          <div class="cv">Pseudocode</div>
+          <div class="cs">كتابة منظمة — مش كود حقيقي، بس اقرب للكود</div>
+        </div>
+        <div class="card">
+          <div class="cl">الطريقة التانية</div>
+          <div class="cv">Flowchart</div>
+          <div class="cs">رسم بصري بأشكال وسهام يوضح ترتيب الخطوات</div>
+        </div>
+        <div class="card">
+          <div class="cl">الطريقة التالتة</div>
+          <div class="cv">كود برمجي</div>
+          <div class="cs">لغة برمجة حقيقية زي Python او C++</div>
+        </div>
+      </div>
+      <div class="blue-box">
+        <strong>Pseudocode</strong> زي مسودة الكتاب قبل ما تطبعه — بتكتب الفكرة اولاً بشكل منظم، وبعدين تحولها لكود حقيقي.
+      </div>
     </div>
 
-    <!-- MAIN CAROUSEL -->
-    <div class="carousel-container">
-
-        <!-- SLIDE 1: THE COGNITIVE BRIDGE -->
-        <div class="slide active">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                CH.03 · ORANGE
-            </div>
-            <h2 class="slide-title">جسر العبور: من الإشارة إلى الترتيب</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
-                        <span class="keyword-text">الكمبيوتر كهرباء وفقط <span class="english-token">Machine Code</span></span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                        <span class="keyword-text">الفجوة بين لغتنا ولغته</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg>
-                        <span class="keyword-text">الحل: تنظيم الأفكار أولاً!</span>
-                    </div>
-                </div>
-                <div class="visual-frame glow">
-                    <svg class="neon-icon-lg" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="22" y2="7"/><line x1="2" y1="17" x2="22" y2="17"/></svg>
-                </div>
-            </div>
+    <!-- SLIDE 2: Warmup -->
+    <div class="slide" id="slide-2">
+      <span class="tag">Warm-up</span>
+      <h2 class="sh">سؤالين سريعين</h2>
+      <div id="q1-block">
+        <p class="qq">1. لو عايز تشرح خطوات تحضير كوباية شاي — هتستخدم ايه؟</p>
+        <div class="qo" id="q1-opts">
+          <button class="qb" onclick="answer(1,'a')">كود Python</button>
+          <button class="qb" onclick="answer(1,'b')">Pseudocode — اكتب الخطوات بشكل منظم</button>
+          <button class="qb" onclick="answer(1,'c')">مفيش فرق، كلهم زي بعض</button>
         </div>
-
-        <!-- SLIDE 2: THE HOOK -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"/></svg>
-                BRAIN TEASER · حيّر دماغك
-            </div>
-            <h2 class="slide-title">لغز الكلمات المجملة</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                        <span class="keyword-text">طلب عام: "اعمل كوباية عصير"</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                        <span class="keyword-text">الكمبيوتر جماد لا يملك استنتاجاً</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                        <span class="keyword-text">الهدف: تفاصيل ميكروسكوبية مرتبة</span>
-                    </div>
-                </div>
-                <div class="visual-frame">
-                    <svg class="neon-icon-lg" viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
-                </div>
-            </div>
+        <div class="qfb" id="q1-fb"></div>
+      </div>
+      <div class="divider"></div>
+      <div id="q2-block">
+        <p class="qq">2. الـ Flowchart بيعبر عن الخطوات بأي شكل؟</p>
+        <div class="qo" id="q2-opts">
+          <button class="qb" onclick="answer(2,'a')">بكود Python</button>
+          <button class="qb" onclick="answer(2,'b')">برسم بصري بأشكال وسهام</button>
+          <button class="qb" onclick="answer(2,'c')">بجدول ارقام</button>
         </div>
-
-        <!-- SLIDE 3: WHAT IS AN ALGORITHM? -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5v-15z"/></svg>
-                TOPIC 3.1 · WHAT IS AN ALGORITHM?
-            </div>
-            <h2 class="slide-title">ما هي الخوارزمية؟ — وصفة الحل</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span class="keyword-text">مفهوم الخوارزمية <span class="english-token">Algorithm</span></span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        <span class="keyword-text">التفكير المنطقي والعقلي قبل التنفيذ</span>
-                    </div>
-                </div>
-                <div class="visual-frame glow">
-                    <div class="grid-4">
-                        <div class="grid-node" style="color: var(--accent-orange);">CLEAR</div>
-                        <div class="grid-node">FINITE</div>
-                        <div class="grid-node">CORRECT</div>
-                        <div class="grid-node">GENERAL</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 4: THE INTEGRATED PIPELINE (PROBLEM) -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                PIPELINE 01 · THE PROBLEM
-            </div>
-            <h2 class="slide-title">المرحلة الأولى: تحديد المشكلة</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                        <span class="keyword-text">المشكلة المستهدفة: "جمع رقمين"</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><arrow-right></arrow-right><polyline points="12 5 19 12 12 19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span class="keyword-text">تحديد المدخلات <span class="english-token">Inputs</span>: الرقم أ، الرقم ب</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><polyline points="5 12 12 5 19 12"/><line x1="12" y1="19" x2="12" y2="5"/></svg>
-                        <span class="keyword-text">تحديد المخرجات <span class="english-token">Output</span>: المجموع</span>
-                    </div>
-                </div>
-                <div class="visual-frame" style="border-color: #6b1111;">
-                    <span style="font-size: 5rem; font-weight: bold; color: #ff7b72;">?</span>
-                    <span style="color: var(--text-muted); font-weight: bold;">أين الحل؟</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 5: PIPELINE (PSEUDO-CODE) -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><div aria-hidden="true"></div><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
-                PIPELINE 02 · PSEUDO-CODE
-            </div>
-            <h2 class="slide-title">المرحلة الثانية: الـ Pseudo-code</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                        <span class="keyword-text">كتابة كود وصفي غير مقيد بلغة</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><list></list><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-                        <span class="keyword-text">ترتيب منطقي خطوة بخطوة للبشر</span>
-                    </div>
-                </div>
-                <div class="visual-frame glow">
-                    <div class="code-box">
-                        <div><span class="c-kw">ALGORITHM</span> AddTwoNumbers</div>
-                        <div><span class="c-kw">BEGIN</span></div>
-                        <div>&nbsp;&nbsp;READ number1</div>
-                        <div>&nbsp;&nbsp;READ number2</div>
-                        <div>&nbsp;&nbsp;sum = number1 + number2</div>
-                        <div>&nbsp;&nbsp;PRINT sum</div>
-                        <div><span class="c-kw">END</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 6: PIPELINE (FLOWCHART) -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                PIPELINE 03 · FLOWCHART
-            </div>
-            <h2 class="slide-title">المرحلة الثالثة: الـ Flowchart</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/></svg>
-                        <span class="keyword-text">الرسم والتمثيل البصري للـ Flow</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                        <span class="keyword-text">أشكال هندسية اصطلاحية محددة</span>
-                    </div>
-                </div>
-                <div class="visual-frame glow">
-                    <div class="flow-diagram">
-                        <div class="flow-shape flow-capsule">البداية (Start)</div>
-                        <div class="flow-arrow"></div>
-                        <div class="flow-shape flow-parallelogram"><span>اقرأ الرقمين أ ، ب</span></div>
-                        <div class="flow-arrow"></div>
-                        <div class="flow-shape flow-rect">المجموع = أ + ب</div>
-                        <div class="flow-arrow"></div>
-                        <div class="flow-shape flow-capsule">النهاية (End)</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 7: PIPELINE (CODE) -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-                PIPELINE 04 · ACTUAL CODE
-            </div>
-            <h2 class="slide-title">المرحلة الرابعة: الكود البرمجي</h2>
-            <div class="content-layout">
-                <div class="keywords-list">
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/></svg>
-                        <span class="keyword-text">الترجمة النهائية للآلة</span>
-                    </div>
-                    <div class="keyword-item">
-                        <svg class="neon-icon" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        <span class="keyword-text">استخدام لغة برمجة حقيقية</span>
-                    </div>
-                </div>
-                <div class="visual-frame glow">
-                    <div class="code-box">
-                        <div><span class="c-kw">let</span> a = <span class="c-str">5</span>;</div>
-                        <div><span class="c-kw">let</span> b = <span class="c-str">10</span>;</div>
-                        <div><span class="c-kw">let</span> sum = a + b;</div>
-                        <div><span class="c-fn">console</span>.<span class="c-fn">log</span>(sum);</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 8: COMPREHENSIVE QUIZ -->
-        <div class="slide">
-            <div class="chapter-tag">
-                <svg class="neon-icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                ASSESSMENT · اختبر معلوماتك
-            </div>
-            <h2 class="slide-title" id="quizTitle">سؤال الحصة!</h2>
-            <div class="quiz-container">
-                <p class="description" id="quizQuestion" style="font-weight: bold; margin-bottom: 10px;"></p>
-                <div class="quiz-option" id="opt0" onclick="checkAnswer(0)"></div>
-                <div class="quiz-option" id="opt1" onclick="checkAnswer(1)"></div>
-                <div class="quiz-option" id="opt2" onclick="checkAnswer(2)"></div>
-                <div class="feedback-text" id="quizFeedback"></div>
-            </div>
-        </div>
-
+        <div class="qfb" id="q2-fb"></div>
+      </div>
+      <div id="warmup-done" style="display:none;">
+        <div class="green-box">ممتاز! دلوقتي نعدي على Sudoku.</div>
+      </div>
     </div>
 
-    <!-- CAROUSEL NAVIGATION CONTROLS -->
-    <div class="nav-container">
-        <button class="btn-nav" id="btnPrev" onclick="changeSlide(-1)" disabled>السابق</button>
-        <div class="dots-container" id="dotsContainer"></div>
-        <button class="btn-nav" id="btnNext" onclick="changeSlide(1)">التالي</button>
+    <!-- SLIDE 3: Sudoku Basics -->
+    <div class="slide" id="slide-3">
+      <span class="tag">Sudoku — ايه هي؟</span>
+      <h2 class="sh">Sudoku — لعبة منطق وتفكير</h2>
+      <div class="blue-box">
+        <strong>Sudoku</strong> كلمة يابانية معناها <em>"رقم واحد بس"</em>. اللعبة دي مش بتعتمد على الحظ — بتعتمد على التفكير المنطقي خطوة خطوة، زي ما بيفكر الكمبيوتر.
+      </div>
+      <div class="cards">
+        <div class="card">
+          <div class="cl">نشأت فين؟</div>
+          <div class="cv">اوروبا — القرن 18</div>
+          <div class="cs">انتشرت في اليابان في الثمانينيات وبقت مشهورة في كل العالم</div>
+        </div>
+        <div class="card">
+          <div class="cl">صلتها بالبرمجة</div>
+          <div class="cv">الكمبيوتر بيحلها</div>
+          <div class="cs">المبرمجين بيكتبوا كود يحل Sudoku تلقائي — وهنتعلم ازاي النهارده</div>
+        </div>
+      </div>
+      <div class="green-box">
+        <strong>معلومة ممتعة:</strong> لعبة Minecraft بتستخدم نفس فكرة التفكير المنظم خطوة خطوة عشان تولد عالمها تلقائي. الـ Algorithm مش بس للـ Sudoku.
+      </div>
     </div>
 
-    <script>
-        // ─── SLIDE CAROUSEL SYSTEM ───
-        let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide');
-        const dotsContainer = document.getElementById('dotsContainer');
-        const progressBar = document.getElementById('progressBar');
-        const btnPrev = document.getElementById('btnPrev');
-        const btnNext = document.getElementById('btnNext');
+    <!-- SLIDE 4: Rules -->
+    <div class="slide" id="slide-4">
+      <span class="tag">القواعد</span>
+      <h2 class="sh">قواعد Sudoku — 5 بس</h2>
+      <ul class="steps">
+        <li><div class="sn">1</div><span>اللوحة شبكة <strong>9 في 9</strong> — يعني <strong>81 خانة</strong>.</span></li>
+        <li><div class="sn">2</div><span>الشبكة مقسمة في <strong>9 مربعات صغيرة</strong> كل واحد <strong>3 في 3</strong>.</span></li>
+        <li><div class="sn">3</div><span>كل <strong>Row</strong> (صف افقي) لازم فيه الارقام 1 لـ 9 من غير تكرار.</span></li>
+        <li><div class="sn">4</div><span>كل <strong>Column</strong> (عمود رأسي) لازم فيه الارقام 1 لـ 9 من غير تكرار.</span></li>
+        <li><div class="sn">5</div><span>كل مربع صغير <strong>3×3</strong> لازم فيه الارقام 1 لـ 9 من غير تكرار.</span></li>
+      </ul>
+      <div class="blue-box">
+        كل رقم من 1 لـ 9 يظهر <strong>مرة واحدة بس</strong> في كل Row، وكل Column، وكل مربع صغير.
+      </div>
+    </div>
 
-        // Dynamically build navigation indicators
-        slides.forEach((_, i) => {
-            const dot = document.createElement('div');
-            dot.className = `dot ${i === 0 ? 'active' : ''}`;
-            dot.onclick = () => goToSlide(i);
-            dotsContainer.appendChild(dot);
+    <!-- SLIDE 5: Strategy -->
+    <div class="slide" id="slide-5">
+      <span class="tag">الاستراتيجية</span>
+      <h2 class="sh">ابدأ من اسهل خانة</h2>
+      <p class="bt">مش كل الخانات الفاضية صعبة بنفس القدر. في خانات عندها اختيارات اقل — وتلك هي الابسط.</p>
+      <div class="blue-box">
+        <strong>المبدأ:</strong> لو خانة فاضية وفيها 8 ارقام في نفس الـ Row — الرقم الوحيد اللي ممكن يدخل فيها هو الرقم الناقص. ده اسهل حالة.
+      </div>
+      <div class="green-box">
+        <strong>قارن بكرة الورق:</strong> لو عندك 8 اوراق وعارف الـ 8 دول — تعرف الورقة التاسعة على طول. نفس الفكرة بالظبط.
+      </div>
+      <p class="bt">
+        <strong>الخطوة العملية:</strong> دور على الخانة اللي عندها اقل ارقام ممكنة — واملاها اول.
+      </p>
+    </div>
+
+    <!-- SLIDE 6: Play -->
+    <div class="slide" id="slide-6">
+      <span class="tag">وقت اللعب</span>
+      <h2 class="sh">جرب تحل Puzzle</h2>
+      <div class="ylw-box">المحاضرة وقفت هنا — خلص الـ Puzzle الاول وبعدين كمل.</div>
+      <div class="sw">
+        <div class="sg" id="sgrid"></div>
+        <div class="ss" id="s-status"></div>
+        <div class="sbtns">
+          <button class="btn btn-g" onclick="checkSudoku()">تحقق من الحل</button>
+          <button class="btn btn-g" onclick="resetSudoku()">ابدأ من الاول</button>
+          <button class="btn btn-g" onclick="showSolution()">اظهر الحل</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Pseudocode step-by-step -->
+    <div class="slide" id="slide-7">
+      <span class="tag">Pseudocode</span>
+      <h2 class="sh">Pseudocode بتاع Sudoku</h2>
+      <p class="bt" style="font-size:0.88rem;color:var(--mut);">كل دوسة على "التالي" بتظهر خطوة جديدة في الـ Pseudocode.</p>
+
+      <div class="ps-container" id="ps-container">
+        <div class="ps-row" id="ps-0">
+          <div class="ps-num">1</div>
+          <div class="ps-code"><span class="fn">START</span> SolveSudoku</div>
+          <div class="ps-label">ابدأ حل الـ Sudoku</div>
+        </div>
+        <div class="ps-row" id="ps-1">
+          <div class="ps-num">2</div>
+          <div class="ps-code">&nbsp;&nbsp;cell = <span class="fn">FindEmpty</span>()</div>
+          <div class="ps-label">دور على اول خانة فاضية</div>
+        </div>
+        <div class="ps-row" id="ps-2">
+          <div class="ps-num">3</div>
+          <div class="ps-code">&nbsp;&nbsp;<span class="kw">IF</span> cell == <span class="vl">NONE</span> &rarr; <span class="vl">DONE</span></div>
+          <div class="ps-label">مفيش فاضية؟ الحل اتكمل</div>
+        </div>
+        <div class="ps-row" id="ps-3">
+          <div class="ps-num">4</div>
+          <div class="ps-code">&nbsp;&nbsp;<span class="kw">FOR</span> num = <span class="vl">1</span> to <span class="vl">9</span></div>
+          <div class="ps-label">جرب كل رقم من 1 لـ 9</div>
+        </div>
+        <div class="ps-row" id="ps-4">
+          <div class="ps-num">5</div>
+          <div class="ps-code">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">IF</span> <span class="fn">IsValid</span>(cell, num)</div>
+          <div class="ps-label">الرقم مناسب للخانة؟</div>
+        </div>
+        <div class="ps-row" id="ps-5">
+          <div class="ps-num">6</div>
+          <div class="ps-code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cell = num</div>
+          <div class="ps-label">حط الرقم في الخانة</div>
+        </div>
+        <div class="ps-row" id="ps-6">
+          <div class="ps-num">7</div>
+          <div class="ps-code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kw">IF</span> <span class="fn">SolveSudoku</span>() &rarr; <span class="vl">DONE</span></div>
+          <div class="ps-label">كمل حل باقي اللوحة</div>
+        </div>
+        <div class="ps-row" id="ps-7">
+          <div class="ps-num">8</div>
+          <div class="ps-code">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cell = <span class="vl">EMPTY</span> <span class="cm">&nbsp;// Backtracking</span></div>
+          <div class="ps-label">غلط؟ امسح وارجع</div>
+        </div>
+        <div class="ps-row" id="ps-8">
+          <div class="ps-num">9</div>
+          <div class="ps-code"><span class="fn">END</span></div>
+          <div class="ps-label">انتهى الـ Pseudocode</div>
+        </div>
+      </div>
+      <div class="ps-next-hint" id="ps-hint">اضغط "التالي" لتظهر الخطوة الاولى</div>
+    </div>
+
+    <!-- SLIDE 8: Quiz -->
+    <div class="slide" id="slide-8">
+      <span class="tag">اسئلة</span>
+      <h2 class="sh">10 اسئلة على اللي اتعلمناه</h2>
+      <div class="qprogress" id="qprog">السؤال 1 من 10</div>
+      <div id="quiz-area"></div>
+      <div class="qscore" id="qscore"></div>
+    </div>
+
+    <!-- SLIDE 9: Conclusion -->
+    <div class="slide" id="slide-9">
+      <span class="tag">الخلاصة</span>
+      <div class="con-wrap">
+        <div class="con-badge">PS</div>
+        <h2 class="sh">اللي اتعلمناه النهارده</h2>
+        <div class="con-sentence">
+          الـ Pseudocode هو طريقة نكتب بيها خطوات حل المشكلة بشكل منظم قبل ما نكتب الكود الحقيقي — وكل Algorithm ممكن نعبر عنه بـ Pseudocode او Flowchart او كود برمجي.
+        </div>
+        <div class="idea-tags">
+          <span class="idea-tag">Algorithm = خطوات</span>
+          <span class="idea-tag">Pseudocode = مسودة الكود</span>
+          <span class="idea-tag">Flowchart = رسم الخطوات</span>
+          <span class="idea-tag">Backtracking = جرب وارجع</span>
+          <span class="idea-tag">Sudoku = مشكلة منطقية</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="btm">
+    <button class="btn btn-g" id="prev-btn" onclick="prevSlide()" style="visibility:hidden;">السابق</button>
+    <span class="nhint" id="nav-hint"></span>
+    <button class="btn btn-p" id="next-btn" onclick="nextSlide()">التالي &larr;</button>
+  </div>
+</div>
+
+<script>
+const TOTAL = 9;
+let cur = 1;
+const wa = {1:null, 2:null};
+
+// Pseudocode step-by-step state
+let psStep = -1; // no rows shown yet
+const PS_ROWS = 9;
+
+function goTo(n) {
+  document.querySelector('.slide.active').classList.remove('active');
+  document.getElementById('slide-' + n).classList.add('active');
+  cur = n;
+  document.getElementById('counter').textContent = n + ' / ' + TOTAL;
+  document.getElementById('progress').style.width = (n / TOTAL * 100) + '%';
+  document.getElementById('prev-btn').style.visibility = n === 1 ? 'hidden' : 'visible';
+  const hint = document.getElementById('nav-hint');
+  hint.textContent = n === 6 ? 'انتظر الطلاب يخلصوا الـ Puzzle' : n === TOTAL ? 'نهاية العرض' : '';
+  document.getElementById('next-btn').textContent = n === TOTAL ? 'انهاء' : 'التالي \u2190';
+  if (n === 6) initSudoku();
+  if (n === 7) { psStep = -1; resetPsRows(); }
+  if (n === 8) initQuiz();
+}
+
+function nextSlide() {
+  // Slide 7: reveal pseudocode rows one by one
+  if (cur === 7 && psStep < PS_ROWS - 1) {
+    psStep++;
+    document.getElementById('ps-' + psStep).classList.add('visible');
+    const hint = document.getElementById('ps-hint');
+    if (psStep < PS_ROWS - 1) {
+      hint.textContent = 'الخطوة ' + (psStep + 1) + ' من ' + PS_ROWS + ' — اضغط "التالي" للخطوة الجاية';
+    } else {
+      hint.textContent = 'تمام! كل الخطوات اتعرضت. اضغط "التالي" لتكمل.';
+    }
+    return;
+  }
+  if (cur < TOTAL) goTo(cur + 1);
+}
+
+function prevSlide() {
+  if (cur === 7 && psStep >= 0) {
+    document.getElementById('ps-' + psStep).classList.remove('visible');
+    psStep--;
+    const hint = document.getElementById('ps-hint');
+    hint.textContent = psStep < 0 ? 'اضغط "التالي" لتظهر الخطوة الاولى' : 'الخطوة ' + (psStep + 1) + ' من ' + PS_ROWS + ' — اضغط "التالي" للخطوة الجاية';
+    return;
+  }
+  if (cur > 1) goTo(cur - 1);
+}
+
+function resetPsRows() {
+  for (let i = 0; i < PS_ROWS; i++) {
+    document.getElementById('ps-' + i).classList.remove('visible');
+  }
+  document.getElementById('ps-hint').textContent = 'اضغط "التالي" لتظهر الخطوة الاولى';
+}
+
+// Warmup
+function answer(q, ch) {
+  const correct = {1:'b', 2:'b'};
+  const fb = {
+    1: {a:'مش صح — Python كود حقيقي.', b:'صح! Pseudocode بيساعدنا نرتب افكارنا.', c:'مش صح — في فرق واضح.'},
+    2: {a:'مش صح.', b:'صح! Flowchart رسم بصري بأشكال وسهام.', c:'مش صح.'}
+  };
+  const opts = document.querySelectorAll('#q' + q + '-opts .qb');
+  opts.forEach(o => o.disabled = true);
+  const idx = ['a','b','c'].indexOf(ch);
+  opts[idx].classList.add(ch === correct[q] ? 'correct' : 'wrong');
+  const el = document.getElementById('q' + q + '-fb');
+  el.textContent = fb[q][ch];
+  el.className = 'qfb ' + (ch === correct[q] ? 'ok' : 'no');
+  wa[q] = ch;
+  if (wa[1] && wa[2]) document.getElementById('warmup-done').style.display = 'block';
+}
+
+// Sudoku
+const puzzle = [
+  [5,3,0,0,7,0,0,0,0],[6,0,0,1,9,5,0,0,0],[0,9,8,0,0,0,0,6,0],
+  [8,0,0,0,6,0,0,0,3],[4,0,0,8,0,3,0,0,1],[7,0,0,0,2,0,0,0,6],
+  [0,6,0,0,0,0,2,8,0],[0,0,0,4,1,9,0,0,5],[0,0,0,0,8,0,0,7,9]
+];
+const sol = [
+  [5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],
+  [8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],
+  [9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]
+];
+let sgrid = [], sinited = false;
+function initSudoku() {
+  if (sinited) return; sinited = true;
+  sgrid = puzzle.map(r => [...r]); renderGrid();
+}
+function renderGrid() {
+  const g = document.getElementById('sgrid'); g.innerHTML = '';
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = document.createElement('div');
+      let cls = 'sc';
+      if (c===2||c===5) cls+=' brT';
+      if (r===2||r===5) cls+=' bbT';
+      cell.className = cls;
+      if (puzzle[r][c]) {
+        cell.classList.add('given'); cell.textContent = puzzle[r][c];
+      } else {
+        const inp = document.createElement('input');
+        inp.type='text'; inp.maxLength=1; inp.dataset.r=r; inp.dataset.c=c;
+        if (sgrid[r][c]) inp.value=sgrid[r][c];
+        inp.addEventListener('input', function() {
+          const v=parseInt(this.value);
+          sgrid[r][c]=(v>=1&&v<=9)?v:0;
+          if(!v) this.value='';
+          this.parentElement.classList.remove('err','okc');
         });
-        const dots = document.querySelectorAll('.dot');
+        inp.addEventListener('keydown', function(e) {
+          if(!/[1-9]/.test(e.key)&&!['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) e.preventDefault();
+        });
+        cell.appendChild(inp);
+      }
+      g.appendChild(cell);
+    }
+  }
+}
+function checkSudoku() {
+  const cells=document.querySelectorAll('#sgrid .sc:not(.given)');
+  let filled=true,correct=true;
+  cells.forEach(cell=>{
+    const inp=cell.querySelector('input');
+    const r=+inp.dataset.r,c=+inp.dataset.c;
+    cell.classList.remove('err','okc');
+    if(!sgrid[r][c]){filled=false;return;}
+    if(sgrid[r][c]===sol[r][c]) cell.classList.add('okc');
+    else{cell.classList.add('err');correct=false;}
+  });
+  const st=document.getElementById('s-status');
+  if(!filled){st.textContent='فيه خانات فاضية لسه.';st.className='ss err';}
+  else if(correct){st.textContent='ممتاز! الحل صح.';st.className='ss ok';}
+  else{st.textContent='في اخطاء — الخانات الحمرا غلط.';st.className='ss err';}
+}
+function resetSudoku(){sgrid=puzzle.map(r=>[...r]);document.getElementById('s-status').textContent='';renderGrid();}
+function showSolution(){sgrid=sol.map(r=>[...r]);renderGrid();const st=document.getElementById('s-status');st.textContent='ده الحل الكامل.';st.className='ss ok';}
 
-        function updateUI() {
-            slides.forEach((slide, index) => slide.classList.toggle('active', index === currentSlide));
-            dots.forEach((dot, index) => dot.classList.toggle('active', index === currentSlide));
-            
-            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
-            btnPrev.disabled = currentSlide === 0;
-            btnNext.disabled = currentSlide === slides.length - 1;
+// === Quiz ===
+const questions = [
+  { q:'الـ Algorithm هو...', opts:['لعبة فيديو','مجموعة خطوات لحل مشكلة','لغة برمجة جديدة'], a:1 },
+  { q:'الـ Pseudocode هو...', opts:['كود Python جاهز','رسم بيوضح الخطوات','كتابة منظمة للخطوات قبل الكود الحقيقي'], a:2 },
+  { q:'الـ Flowchart بيعبر عن الـ Algorithm بأي شكل؟', opts:['كتابة نصية فقط','رسم بصري بأشكال وسهام','جدول ارقام'], a:1 },
+  { q:'لوحة Sudoku عندها كام خانة؟', opts:['64','81','100'], a:1 },
+  { q:'في Sudoku، كل Row لازم يحتوي على...', opts:['الارقام 1 لـ 9 من غير تكرار','ارقام زوجية بس','اي ارقام حتى لو بتتكرر'], a:0 },
+  { q:'معنى كلمة Sudoku باليابانية هو...', opts:['رقم واحد بس','لعبة الذكاء','المربع السحري'], a:0 },
+  { q:'الـ Backtracking معناه...', opts:['تخطي الخانة الصعبة','مسح الرقم الغلط والرجوع لتجربة رقم تاني','البدأ من اول اللوحة'], a:1 },
+  { q:'الخطوة الاولى في الـ Pseudocode بتاع Sudoku هي...', opts:['حط رقم في اول خانة','دور على اول خانة فاضية','اطبع الحل'], a:1 },
+  { q:'IsValid في الـ Pseudocode بتتحقق من...', opts:['ان الرقم مش موجود في نفس الصف والعمود والمربع','ان الرقم اكبر من 5','ان الخانة مش فاضية'], a:0 },
+  { q:'الـ Pseudocode بيتحول بعدين لـ...', opts:['Flowchart','كود برمجي حقيقي','لعبة Sudoku'], a:1 }
+];
 
-            if (currentSlide === slides.length - 1) {
-                loadQuizQuestion();
-            }
-        }
+let qcur = 0, qscore = 0, qinited = false;
+function initQuiz() {
+  if (qinited) return; qinited = true;
+  qcur = 0; qscore = 0; renderQ();
+}
+function renderQ() {
+  if (qcur >= questions.length) {
+    document.getElementById('quiz-area').innerHTML = '';
+    document.getElementById('qprog').style.display = 'none';
+    const sc = document.getElementById('qscore');
+    sc.style.display = 'block';
+    sc.textContent = 'نتيجتك: ' + qscore + ' / ' + questions.length + (qscore >= 8 ? ' — ممتاز!' : qscore >= 5 ? ' — كويس!' : ' — راجع التانية!');
+    return;
+  }
+  document.getElementById('qprog').textContent = 'السؤال ' + (qcur+1) + ' من ' + questions.length;
+  const d = questions[qcur];
+  let html = '<p class="qq">' + d.q + '</p><div class="qo">';
+  d.opts.forEach((op,i) => {
+    html += '<button class="qb" onclick="pickQ(' + i + ')">' + op + '</button>';
+  });
+  html += '</div><div class="qfb" id="qfb"></div>';
+  document.getElementById('quiz-area').innerHTML = html;
+}
+function pickQ(i) {
+  const d = questions[qcur];
+  const opts = document.querySelectorAll('#quiz-area .qb');
+  opts.forEach(o => o.disabled = true);
+  opts[i].classList.add(i === d.a ? 'correct' : 'wrong');
+  if (i !== d.a) opts[d.a].classList.add('correct');
+  const fb = document.getElementById('qfb');
+  if (i === d.a) { fb.textContent = 'صح!'; fb.className = 'qfb ok'; qscore++; }
+  else { fb.textContent = 'غلط — الصح: ' + d.opts[d.a]; fb.className = 'qfb no'; }
+  setTimeout(() => { qcur++; renderQ(); }, 1200);
+}
 
-        function changeSlide(dir) {
-            currentSlide += dir;
-            updateUI();
-        }
-
-        function goToSlide(idx) {
-            currentSlide = idx;
-            updateUI();
-        }
-
-        // ─── INTERACTIVE IN-CLASS QUIZ SYSTEM ───
-        const quizData = [
-            {
-                q: "الكمبيوتر مبيفهمش لغتنا العادية لأنه في الأصل عبارة عن إيه؟",
-                options: ["جهاز شغال بإشارات ومسارات كهربائية 0 و 1", "شاشة ذكية بتخمن كلامنا لوحدها", "برنامج ألعاب كبير"],
-                correct: 0,
-                feedback: "ممتاز! الكمبيوتر هاردوير بيفهم نبضات الكهرباء بس."
-            },
-            {
-                q: "مين اللي بنعمله الأول وبنرتب فيه دماغنا قبل ما نلمس الكيبورد ونبرمج؟",
-                options: ["بنكتب الكود البرمجي الفعلي حلاً سريعاً", "بنصمم الخوارزمية Algorithm ونرتب خطوات الحل", "بنقفل الجهاز ونفتحه تاني"],
-                correct: 1,
-                feedback: "صحيح! التفكير المنطقي وتصميم الـ Algorithm هو الخطوة الأساسية الأولى."
-            },
-            {
-                q: "لما بنرسم أشكال هندسية (زي المستطيل والمتوازي) عشان نوضح خطوات الحل، ده بيبقى اسمه:",
-                options: ["سودوكو Pseudo-code", "كود برمجي Code", "مخطط تدفق Flowchart"],
-                correct: 2,
-                feedback: "رائع! الأشكال الهندسية والأسهم بتعبر عن الـ Flowchart."
-            }
-        ];
-
-        let currentQuizIndex = 0;
-        let answered = false;
-
-        function loadQuizQuestion() {
-            answered = false;
-            const currentQ = quizData[currentQuizIndex];
-            document.getElementById('quizTitle').innerText = `سؤال الحصة (${currentQuizIndex + 1} من ${quizData.length})`;
-            document.getElementById('quizQuestion').innerText = currentQ.q;
-            document.getElementById('quizFeedback').innerText = "";
-            document.getElementById('quizFeedback').style.color = "var(--text-primary)";
-
-            currentQ.options.forEach((opt, idx) => {
-                const el = document.getElementById(`opt${idx}`);
-                el.innerText = opt;
-                el.className = "quiz-option";
-            });
-        }
-
-        function checkAnswer(selectedIdx) {
-            if (answered) return;
-            answered = true;
-
-            const currentQ = quizData[currentQuizIndex];
-            const feedbackEl = document.getElementById('quizFeedback');
-
-            if (selectedIdx === currentQ.correct) {
-                document.getElementById(`opt${selectedIdx}`).classList.add('correct');
-                feedbackEl.innerText = currentQ.feedback;
-                feedbackEl.style.color = "#85e89d";
-                
-                // Cycle to the next question automatically after a short delay
-                setTimeout(() => {
-                    currentQuizIndex = (currentQuizIndex + 1) % quizData.length;
-                    loadQuizQuestion();
-                }, 2500);
-            } else {
-                document.getElementById(`opt${selectedIdx}`).classList.add('wrong');
-                document.getElementById(`opt${currentQ.correct}`).classList.add('correct');
-                feedbackEl.innerText = "حاول تاني! ركز في الترتيب والمفهوم المنطقي.";
-                feedbackEl.style.color = "#ff7b72";
-                
-                setTimeout(() => {
-                    loadQuizQuestion();
-                }, 2500);
-            }
-        }
-    </script>
+document.addEventListener('keydown', function(e) {
+  const active = document.activeElement;
+  const inGrid = active && active.tagName === 'INPUT' && active.closest('#sgrid');
+  if (!inGrid) {
+    if (e.key === 'ArrowRight' || e.key === 'Enter') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  }
+});
+</script>
 </body>
 </html>
